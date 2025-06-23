@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  # client:
+  #   platform: linux/arm64
+  #   build:
+  #     context: ./client
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   working_dir: /app
+  #   volumes:
+  #     - ./client/app:/app
+  #   environment:
+  #     - CHOKIDAR_USEPOLLING=true
+
+  server:
+    build: ./server
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/intelldb
+      - AI_ENGINE_URL=http://ai-engine:8000
+    depends_on:
+      - db
+      - ai-engine
+
+  ai-engine:
+    build: ./ai-engine
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ai-engine:/app
+    environment:
+      - FLASK_ENV=development
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: intelldb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
