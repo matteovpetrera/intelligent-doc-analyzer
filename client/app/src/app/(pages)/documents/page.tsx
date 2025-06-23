@@ -1,7 +1,7 @@
 "use client";
 
 import { getDocumentById, getDocuments } from "@/api/documentApi";
-import { SetStateAction, useEffect, useState } from "react";
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import { PlusIcon } from "lucide-react";
 import {
   Theme,
@@ -48,6 +48,17 @@ export default function DocumentPage() {
     }
     fetchSelectedDoc();
   }, [selectedId]);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setFile(file);
+  };
 
   const handleUpload = async () => {
     if (!file) return;
@@ -124,16 +135,19 @@ export default function DocumentPage() {
               Carica Nuovo Documento
             </Heading>
             <Tooltip content="Upload a file">
-              <IconButton radius="full">
-                <PlusIcon></PlusIcon>
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  style={{ display: "none" }}
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                />
+              <IconButton radius="full" onClick={handleClick}>
+                <PlusIcon />
               </IconButton>
             </Tooltip>
+
+            {/* Input invisibile */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/pdf"
+              onChange={handleChange}
+              style={{ display: "none" }}
+            />
 
             <Button disabled={!file} onClick={handleUpload}>
               Carica Documento
